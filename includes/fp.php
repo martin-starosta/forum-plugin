@@ -12,6 +12,9 @@
 /**
  * Main class for Forum Plugin
  */
+
+ require_once (__DIR__ . '/jobs/jobs.php');
+
 class Forum {
 
 	/**
@@ -21,15 +24,18 @@ class Forum {
 		register_activation_hook( __FILE__, array( $this, 'fp_activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, 'fp_deactivate' ) );
 
-		add_action( 'init', array( $this, 'fp_run' ) );
 		add_action( 'init', array( $this, 'fp_create_taxonomies' ) );
+		add_action( 'init', array( $this, 'create_jobposttype' ) );
+		add_action( 'init', array( $this, 'fp_run' ) );
 	}
 
 	/**
 	 * Function initialize plugin and call init functions.
 	 */
 	public function fp_run() {
-		/* Nothing implemented yet. */
+		//Create job (TEST)
+		$jobs = new Jobs();
+		$jobs->init();
 	}
 
 	/**
@@ -116,5 +122,46 @@ class Forum {
 				'labels' => $labels,
 			)
 		);
+	}
+
+	function create_jobposttype() {
+		$labels = array (
+			'name' => 'Pracovné pozície',
+			'singular_name' => 'Pracovná pozícia',
+			'menu_name' => 'Pracovné pozície',
+			'parent_item_colon' => 'Hlavná pozícia',
+			'all_items' => 'Všetky pozície',
+			'view_item' => 'Zobraziť pracovnú pozíciu',
+			'add_new_item' => 'Pridať novú prac. pozíciu',
+			'add_new' => 'Pridať novú',
+			'edit_item' => 'Upraviť pozíciu',
+			'update_item' => 'Aktualizovať pozíciu',
+			'search_items' => 'Hľadať pracovnú pozíciu',
+			'not_found' => 'Pracovná pozícia sa nenašla',
+			'not_found_in_trash' => 'Pozícia sa nenašla v koši',
+		);
+		
+		$args = array (
+			'label' => 'Pracovná pozícia',
+			'description' => 'Voľné pracovné pozície pre KAM-ov.',
+			'labels' => $labels,
+			'supports' => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 
+			'comments', 'revisions', 'custom-fields', ),
+			'taxonomies' => array( 'job_category' ),
+			'hierarchical' => false,
+			'public' => true,
+			'show_ui' => true,
+			'show_in_menu' => true,
+			'show_in_admin_bar' => true,
+			'show_in_nav_menus' => true,
+			'menu_position' => 5,
+			'can_export' => true,
+			'has_archive' => true,
+			'exclude_from_search' => false,
+			'publicly_queryable' => true,
+			'capability_type' => 'post',
+		);
+
+		register_post_type( 'jobs', $args );
 	}
 }
