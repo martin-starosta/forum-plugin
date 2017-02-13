@@ -9,24 +9,30 @@
  * @see       https://kamforum.sk
  */
 
+require_once( 'profesia.php' );
+
 /**
  * Main class for handling job posts
  */
- require_once('profesia.php');
-
 class Jobs {
-    const JOB_POST_TYPE = 'jobs';
 
-    public function init() {
-        $this->create_job_categories_taxonomy();
-        $this->create_job_positions_taxonomy();
+	/**
+	 * Function registers job custom post type and related taxonomies.
+	 */
+	public function init() {
+		$this->create_job_categories_taxonomy();
+		$this->create_job_positions_taxonomy();
 
-        //TODO: Zavolaj pri zapnuti pluginu
-        $profesia = new Profesia();
-        $profesia->init();
-    }
+		$this->create_jobposttype();
 
-    public function create_job_categories_taxonomy() {
+		$profesia = new Profesia();
+		$profesia->init();
+	}
+
+	/**
+	 * Function registers job category taxonomy.
+	 */
+	public function create_job_categories_taxonomy() {
 		$labels = array(
 			'name' => 'Kategórie',
 			'singular_name' => 'Kategória',
@@ -55,7 +61,10 @@ class Jobs {
 		);
 	}
 
-    public function create_job_positions_taxonomy() {
+	/**
+	 * Function registers job position taxonomy.
+	 */
+	public function create_job_positions_taxonomy() {
 		$labels = array(
 			'name' => 'Pozície',
 			'singular_name' => 'Pozícia',
@@ -84,32 +93,55 @@ class Jobs {
 		);
 	}
 
-    public function createJob() {
-        $post_id = -1;
-        $author_id = 1;
-        $slug = 'example-job';
-        $title = 'Programatically created job';
+	/**
+	 * Function registers job custom post type.
+	 */
+	function create_jobposttype() {
+		$labels = array (
+			'name' => 'Pracovné pozície',
+			'singular_name' => 'Pracovná pozícia',
+			'menu_name' => 'Pracovné pozície',
+			'parent_item_colon' => 'Hlavná pozícia',
+			'all_items' => 'Všetky pozície',
+			'view_item' => 'Zobraziť pracovnú pozíciu',
+			'add_new_item' => 'Pridať novú prac. pozíciu',
+			'add_new' => 'Pridať novú',
+			'edit_item' => 'Upraviť pozíciu',
+			'update_item' => 'Aktualizovať pozíciu',
+			'search_items' => 'Hľadať pracovnú pozíciu',
+			'not_found' => 'Pracovná pozícia sa nenašla',
+			'not_found_in_trash' => 'Pozícia sa nenašla v koši',
+		);
 
-        //TODO: Check by position ID?
-        if ( null === get_page_by_title( $title, OBJECT, self::JOB_POST_TYPE) ) {
-            //Create job post
-            $post_id = wp_insert_post(
-                array(
-                    'post_author' => $author_id,
-                    'post_name' => $slug,
-                    'post_title' => $title,
-                    'post_status' => 'publish',
-                    'post_type' => self::JOB_POST_TYPE,
-                )
-            );
+		$args = array(
+			'label' => 'Pracovná pozícia',
+			'description' => 'Voľné pracovné pozície pre KAM-ov.',
+			'labels' => $labels,
+			'supports' => array(
+				'title',
+				'editor',
+				'excerpt',
+				'author',
+				'thumbnail',
+				'comments',
+				'revisions',
+				'custom-fields',
+			),
+			'taxonomies' => array( 'job_category' ),
+			'hierarchical' => false,
+			'public' => true,
+			'show_ui' => true,
+			'show_in_menu' => true,
+			'show_in_admin_bar' => true,
+			'show_in_nav_menus' => true,
+			'menu_position' => 5,
+			'can_export' => true,
+			'has_archive' => true,
+			'exclude_from_search' => false,
+			'publicly_queryable' => true,
+			'capability_type' => 'post',
+		);
 
-            if ($post_id) {
-                // insert post meta
-                add_post_meta($post_id, 'kraj', 'Žilinský kraj');
-            }
-        } else {
-            //Job post already exists
-            $post_id = -2;
-        }
-    }
+		register_post_type( 'jobs', $args );
+	}
 }
