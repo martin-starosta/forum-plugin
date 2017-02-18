@@ -39,4 +39,4 @@ jspm_packages
 #Composer
 vendor
 
-gulpfile.js
+./gulpfile.js
