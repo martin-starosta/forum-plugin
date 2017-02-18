@@ -22,6 +22,7 @@ class Jobs {
 	public function init() {
 		$this->create_job_categories_taxonomy();
 		$this->create_job_positions_taxonomy();
+		$this->create_job_types_taxonomy();
 
 		$this->create_jobposttype();
 
@@ -143,5 +144,37 @@ class Jobs {
 		);
 
 		register_post_type( 'jobs', $args );
+	}
+
+	/**
+	 * Function registers job types taxonomy.
+	 */
+	private function create_job_types_taxonomy() {
+		$labels = array(
+			'name' => 'Typ úväzku',
+			'singular_name' => 'Typ úväzku',
+			'search_items' => 'Hľadať podľa typu úväzku',
+			'all_items' => 'Všetky typy',
+			'edit_item' => 'Upraviť typ',
+			'update_item' => 'Aktualizovať typ',
+			'add_new_item' => 'Pridať nový typ',
+			'menu_name' => 'Typ úväzku',
+			'view_items' => 'Zobraziť typ',
+			'popular_items' => 'Najčastejšie používané typy',
+			'separate_items_with_comas' => 'Oddeľte typy čiarkou',
+			'add_or_remove_item' => 'Pridať alebo odobrať typ',
+			'choose_from_most_used' => 'Vybrať z najčastejšie používaných',
+			'not_found' => 'Typ úväzku sa nenašiel',
+		);
+
+		register_taxonomy(
+			'job_type',
+			'jobs',
+			array(
+				'label' => __( 'JobType' ),
+				'hierarchical' => false,
+				'labels' => $labels,
+			)
+		);
 	}
 }

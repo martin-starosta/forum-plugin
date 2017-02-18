@@ -2471,7 +2471,7 @@ County Tyrone and Fermanagh (Augher, Cookstown, Dungannon, Enniskillen, Omagh, S
 		<region id="1106" parent_id="0">Zahraničie - ostatné</region>
 	</regions>
 	<jobtypes>
-		<www.profesia.sk>
+		<profesia>
 			<jobtype>
 				<type id="1">plný úväzok</type>
 				<type id="2">skrátený úväzok</type>
@@ -2479,7 +2479,7 @@ County Tyrone and Fermanagh (Augher, Cookstown, Dungannon, Enniskillen, Omagh, S
 				<type id="8">živnosť</type>
 				<type id="32">internship, stáž</type>
 			</jobtype>
-		</www.profesia.sk>
+		</profesia>
 		<www.workania.hu>
 			<jobtype>
 				<type id="1">plný úväzok</type>

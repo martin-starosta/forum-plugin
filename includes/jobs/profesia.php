@@ -54,6 +54,11 @@ class Profesia {
 			$this->create_term( 'job_position', $position[0] );
 		}
 
+		$types = $this->read_job_types( $this->xml );
+		foreach ( $types as $type ) {
+			$this->create_term( 'job_type', $type[0] );
+		}
+
 		$this->create_job_posts_from_profesia_feed();
 	}
 
@@ -73,6 +78,15 @@ class Profesia {
 	 */
 	public function read_positions( $xml ) {
 		return $xml->positions->position;
+	}
+
+	/**
+	 * Reads job types from XML.
+	 *
+	 * @param SimpleXML $xml XML object with Profesia codes.
+	 */
+	public function read_job_types( $xml ) {
+		return $xml->jobtypes->profesia->jobtype->type;
 	}
 
 	/**
@@ -126,6 +140,9 @@ class Profesia {
 
 		$categories = StringHelper::get_simplexmls_as_strings( $job_offer->offercategories->offercategory );
 		$positions = StringHelper::get_simplexmls_as_strings( $job_offer->offerpositions->offerposition );
+		$types = StringHelper::get_simplexmls_as_strings( $job_offer->jobtypes->jobtype );
+		$types = $this->convert_job_type_ID_to_string( $types );
+
 		// TODO: Check by position ID?
 		if ( null === get_page_by_title( $title, OBJECT, self::JOB_POST_TYPE ) ) {
 			$post_id = wp_insert_post(
@@ -140,12 +157,30 @@ class Profesia {
 
 			if ($post_id) {
 				// insert post meta
-				//add_post_meta($post_id, 'company', (string) $job_offer->company->innerNode );
+				add_post_meta($post_id, 'company', (string) $job_offer->company );
 				wp_set_post_terms( $post_id, $categories, 'job_category' );
 				wp_set_post_terms( $post_id, $positions, 'job_position' );
+				wp_set_post_terms( $post_id, $types, 'job_type' );
 			}
 		} else {
 			// Do nothing because job already exists in DB
 		}
+	}
+
+	private function convert_job_type_ID_to_string( $job_types ) {
+		if( !is_array( $job_types ) ) {
+			$job_types = [$job_types];
+		}
+
+		return array_map( function( $id ) {
+			switch( $id) {
+				case 1: return "plný úväzok";
+				case 2: return "skrátený úväzok";
+				case 4: return "na dohodu (brigády)";
+				case 8: return "živnosť";
+				case 32: return "internship, stáž";
+				default: return "";
+			}
+		}, $job_types );
 	}
 }
