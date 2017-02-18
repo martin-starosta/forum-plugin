@@ -10,6 +10,7 @@
  */
 
 require_once( __DIR__ . '/../helpers/stringhelper.php' );
+require_once( __DIR__ . '/../helpers/datehelper.php' );
 
 /**
  * Main class for handling profesia tasks
@@ -17,6 +18,7 @@ require_once( __DIR__ . '/../helpers/stringhelper.php' );
 class Profesia {
 
 	const JOB_POST_TYPE = 'jobs';
+	const IMPORT_MAX_DAYS_OLD = 1;
 
 	/**
 	 * XML contains Profesia book codes (lists).
@@ -122,7 +124,6 @@ class Profesia {
 		$offers = $this->get_offers( $this->xml_feed );
 		foreach( $offers as $offer) {
 			$this->create_profesia_job( $offer );
-			return;
 		}
 	}
 
@@ -132,7 +133,6 @@ class Profesia {
 	 * @param SimpleXML $job_offer SimpleXML Object for job offer from Profesia XML feed.
 	 */
 	public function create_profesia_job( $job_offer ) {
-		$post_id = -1;
 		$author_id = 1;
 
 		$title = $job_offer->position[0];
@@ -142,14 +142,30 @@ class Profesia {
 		$positions = StringHelper::get_simplexmls_as_strings( $job_offer->offerpositions->offerposition );
 		$types = StringHelper::get_simplexmls_as_strings( $job_offer->jobtypes->jobtype );
 		$types = $this->convert_job_type_ID_to_string( $types );
+		$external_id = (string) $job_offer['id'];
+		$last_updated = (string) $job_offer->last_updated;
 
-		// TODO: Check by position ID?
-		if ( null === get_page_by_title( $title, OBJECT, self::JOB_POST_TYPE ) ) {
+		$date = DateTime::createFromFormat('Y-m-d H:i:s', $last_updated);
+		if( DateHelper::is_older_than_days( $date, self::IMPORT_MAX_DAYS_OLD ) === true ) {
+			// Job post is older than max. number of days, so not importing
+			return;
+		}
+
+		$page = get_page_by_title( $title, OBJECT, self::JOB_POST_TYPE );
+		$posts = get_posts(array(
+			'numberposts'	=> 1,
+			'post_type'		=> 'jobs',
+			'meta_key'		=> 'external_id',
+			'meta_value'	=> $external_id,
+		));
+
+		if ( null === $page && sizeof( $posts ) === 0 ) {
 			$post_id = wp_insert_post(
 				array(
 					'post_author' => $author_id,
 					'post_name' => $slug,
 					'post_title' => $title,
+					'post_date' => $last_updated,
 					'post_status' => 'publish',
 					'post_type' => self::JOB_POST_TYPE,
 				)
@@ -158,12 +174,17 @@ class Profesia {
 			if ($post_id) {
 				// insert post meta
 				add_post_meta($post_id, 'company', (string) $job_offer->company );
+				add_post_meta($post_id, 'url', (string) $job_offer->url );
+				add_post_meta($post_id, 'location', (string) $job_offer->location );
+				add_post_meta($post_id, 'external_id', $external_id );
+				add_post_meta($post_id, 'source', 'PROFESIA' );
+				add_post_meta($post_id, 'featured', 'false' );
 				wp_set_post_terms( $post_id, $categories, 'job_category' );
 				wp_set_post_terms( $post_id, $positions, 'job_position' );
 				wp_set_post_terms( $post_id, $types, 'job_type' );
 			}
 		} else {
-			// Do nothing because job already exists in DB
+			//TODO: Job already exists. Update or do nothing?
 		}
 	}
 
