@@ -28,11 +28,10 @@ class Forum {
 	public function __construct() {
 		$this->jobs = new Jobs();
 
-		register_activation_hook( __FILE__, array( $this, 'fp_activate' ) );
-		register_deactivation_hook( __FILE__, array( $this, 'fp_deactivate' ) );
-
 		add_action( 'init', array( $this, 'fp_create_taxonomies' ) );
 		add_action( 'init', array( $this, 'fp_run' ) );
+
+		add_action( 'daily_profesia_feed', array( $this, 'import_profesia_feed' ) );
 	}
 
 	/**
@@ -41,20 +40,23 @@ class Forum {
 	public function fp_run() {
 		// Register job custom post type and related taxonomies.
 		$this->jobs->init();
+
 	}
 
 	/**
 	 * Function is called on plugin activation.
 	 */
 	public function fp_activate() {
-
+		if ( ! wp_next_scheduled( 'daily_profesia_feed' ) ) {
+			wp_schedule_event( time(), 'daily', 'daily_profesia_feed' );
+		}
 	}
 
 	/**
 	 * Function is called on plugin deactivation.
 	 */
 	public function fp_deactivate() {
-		echo 'Forum Plugin has been deactivated';
+		wp_clear_scheduled_hook( 'daily_profesia_feed' );
 	}
 
 	/**
@@ -127,5 +129,12 @@ class Forum {
 				'labels' => $labels,
 			)
 		);
+	}
+
+	/**
+	 * Function imports job offers from Profesia XML feed.
+	 */
+	private function import_profesia_feed() {
+		$this->jobs->init_profesia();
 	}
 }

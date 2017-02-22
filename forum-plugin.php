@@ -20,6 +20,9 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/fp.php';
  */
 function run_forum() {
 	$plugin = new Forum();
+
+	register_activation_hook( __FILE__, array( $plugin, 'fp_activate' ) );
+	register_deactivation_hook( __FILE__, array( $plugin, 'fp_deactivate' ) );
 }
 
 run_forum();

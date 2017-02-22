@@ -7,5 +7,5 @@ gulp.task('watch', function() {
 
 gulp.task('build', function() {
     gulp.src('**/*')
-        .pipe(gulp.dest('../kam-wp/wp-content/plugins/forum-plugin'));
+        .pipe(gulp.dest('../kam-on-wp/wp-content/plugins/forum-plugin'));
 });

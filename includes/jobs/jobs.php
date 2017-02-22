@@ -26,6 +26,12 @@ class Jobs {
 
 		$this->create_jobposttype();
 
+	}
+
+	/**
+	 * Function initialize Profesia class and imports job offers from XML feed.
+	 */
+	public function init_profesia() {
 		$profesia = new Profesia();
 		$profesia->init();
 	}
@@ -98,7 +104,7 @@ class Jobs {
 	 * Function registers job custom post type.
 	 */
 	function create_jobposttype() {
-		$labels = array (
+		$labels = array(
 			'name' => 'Pracovné pozície',
 			'singular_name' => 'Pracovná pozícia',
 			'menu_name' => 'Pracovné pozície',
