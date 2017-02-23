@@ -146,7 +146,7 @@ class Jobs {
 			'has_archive' => true,
 			'exclude_from_search' => false,
 			'publicly_queryable' => true,
-			'capability_type' => 'post',
+			'capability_type' => 'page',
 		);
 
 		register_post_type( 'jobs', $args );
