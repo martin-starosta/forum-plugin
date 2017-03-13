@@ -31,6 +31,9 @@ class Forum {
 		add_action( 'init', array( $this, 'fp_create_taxonomies' ) );
 		add_action( 'init', array( $this, 'fp_run' ) );
 
+		//Import jobs manually when there is paramater import in URL
+		add_action( 'init', array( $this, 'import_profesia_feed_manually' ) );
+
 		add_action( 'daily_profesia_feed', array( $this, 'import_profesia_feed' ) );
 	}
 
@@ -134,7 +137,17 @@ class Forum {
 	/**
 	 * Function imports job offers from Profesia XML feed.
 	 */
-	private function import_profesia_feed() {
+	public function import_profesia_feed() {
 		$this->jobs->init_profesia();
+	}
+
+	/**
+	 * Function imports job offers from Profesia XML feed on demand
+	 */
+	public function import_profesia_feed_manually() {
+		$do_import = ( isset( $_GET['import'] ) ) ? filter_var($_GET['import'], FILTER_VALIDATE_BOOLEAN) : false;
+		if( $do_import ) {
+			$this->jobs->init_profesia();
+		}
 	}
 }

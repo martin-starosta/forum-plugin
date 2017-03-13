@@ -17,6 +17,7 @@ require_once( __DIR__ . '/../helpers/datehelper.php' );
  */
 class Profesia {
 
+	const PROFESIA_XML_FEED_URL = 'http://www.profesia.sk/partner/export.php?auth=d4445ddb73312c3b60da8d7b301ce7da';
 	const JOB_POST_TYPE = 'jobs';
 	const IMPORT_MAX_DAYS_OLD = 1;
 
@@ -39,7 +40,7 @@ class Profesia {
 	 */
 	public function __construct() {
 		$this->xml = simplexml_load_file( plugin_dir_path( __FILE__ ) . 'lists.xml' );
-		$this->xml_feed = simplexml_load_file( plugin_dir_path( __FILE__ ) . 'profesia-export.xml' );
+		$this->xml_feed = simplexml_load_file( self::PROFESIA_XML_FEED_URL );
 	}
 
 	/**
